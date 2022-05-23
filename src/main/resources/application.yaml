@@ -1,0 +1,28 @@
+server:
+  port: ${PORT:8090}
+
+
+spring:
+  messages:
+    basename: messages
+    encoding: UTF-8
+  datasource:
+    #url: jdbc:mysql://mariadb.twolinecode.com:3306/JDP?useUnicode=yes&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=Asia/Seoul
+    #driver-class-name: org.mariadb.jdbc.Driver
+    #url: jdbc:log4jdbc:mysql://mariadb.twolinecode.com:3306/JDP?useUnicode=yes&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=Asia/Seoul
+    #driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    #username: jdp_dev
+    #password: tlc2021#
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/shop?serverTimezone=UTC&characterEncoding=UTF-8
+    username: root
+    password: 1234
+
+mybatis:
+  type-aliases-package: com.jwt.model
+  mapper-locations: mappers/*Mapper.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+JwtProperties:
+  token-prefix: Authorization
