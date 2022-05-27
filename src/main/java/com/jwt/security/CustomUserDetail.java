@@ -1,15 +1,17 @@
-package com.jwt.auth;
-import com.jwt.model.User;
+package com.jwt.security;
+
+import com.jwt.domain.request.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class CustomUserDetail implements UserDetails {
     private User user;
 
-    public CustomUserDetail(User user){
-        this.user=user;
+    public CustomUserDetail(User user) {
+        this.user = user;
     }
 
     @Override
@@ -54,7 +56,7 @@ public class CustomUserDetail implements UserDetails {
         return true;
     }
 
-    public long getId(){
+    public long getId() {
         return user.getId();
     }
 }

@@ -1,4 +1,5 @@
-package com.jwt.model;
+package com.jwt.domain.request;
+
 import lombok.Data;
 
 @Data
@@ -7,4 +8,7 @@ public class User {
     private String email;
     private String password;
     private String role;
+    private String name;
+    private String phoneNumber;
+    private String address;
 }
