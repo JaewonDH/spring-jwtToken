@@ -1,10 +1,8 @@
 package com.jwt.util;
-
 import com.jwt.domain.model.TokenInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-
 import java.util.concurrent.TimeUnit;
 
 @Component
