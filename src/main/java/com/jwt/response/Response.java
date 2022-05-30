@@ -13,13 +13,22 @@ public class Response {
     private String message;
 
     public Response() {
-        status = HttpStatus.OK.getReasonPhrase();
-        statusCode = HttpStatus.OK.value();
+        init();
+    }
+
+    public Response(String message) {
+        this.message = message;
+        init();
     }
 
     public void setResponse(String message, Object value) {
         this.message = message;
         setData(value);
+    }
+
+    private void init(){
+        status = HttpStatus.OK.getReasonPhrase();
+        statusCode = HttpStatus.OK.value();
     }
 
     public void setResponse(String message, Object value, String status, int statusCode) {

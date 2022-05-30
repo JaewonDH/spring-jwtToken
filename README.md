@@ -35,3 +35,6 @@ body {
 - access 토큰 유효성 확인
 - access 토큰 블랙리스트에 있는지 확인
 - 정상 동작 할 경우 통과 
+
+# local에 redis 설치  
+https://github.com/microsoftarchive/redis

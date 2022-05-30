@@ -3,10 +3,10 @@
 <mapper namespace="com.jwt.mapper.UserMapper">
     <select id="getUserList" resultType="com.jwt.domain.model.UserInfo">
         SELECT *
-        FROM study_user
+        FROM jwt_user
     </select>
     <insert id="insertUser" useGeneratedKeys="true"  parameterType="com.jwt.domain.request.User">
-        INSERT INTO study_user (email,name,password,role,phoneNumber,address,createDate)
+        INSERT INTO jwt_user (email,name,password,role,phoneNumber,address,createDate)
         VALUES(
             #{email},
             #{name},
@@ -20,13 +20,13 @@
 
     <select id="getFindByEmail" parameterType="String" resultType="com.jwt.domain.request.User">
         SELECT *
-        FROM study_user
+        FROM jwt_user
         where email = #{value}
     </select>
 
     <select id="getUserInfo" parameterType="String" resultType="com.jwt.domain.model.UserInfo">
         SELECT email,name,phoneNumber,address,createDate
-        FROM study_user
+        FROM jwt_user
         where email = #{value}
     </select>
 </mapper>
