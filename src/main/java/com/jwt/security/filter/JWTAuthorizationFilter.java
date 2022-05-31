@@ -3,6 +3,7 @@ package com.jwt.security.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jwt.domain.request.User;
 import com.jwt.response.Response;
+import com.jwt.response.ResponseData;
 import com.jwt.security.CustomUserDetail;
 import com.jwt.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -20,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static com.jwt.response.ErrorCode.INVALID_FORBIDDEN;
+import static com.jwt.response.ErrorCode.*;
 
 //허가
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
@@ -46,25 +47,30 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                     chain.doFilter(request, response);
                     return;
                 } else {
-                    setForbiddenResponse("인증에 실패하였습니다.", response);
+                    setResponseError(response,Response
+                            .getNewInstance()
+                            .createErrorResponseData(INVALID_UNAUTHORIZED));
                     return;
                 }
             }
         } catch (Exception e) {
             if (e instanceof ExpiredJwtException) {
-                setForbiddenResponse(e.getMessage(), response);
-                return;
+                setResponseError(response, Response
+                        .getNewInstance()
+                        .createErrorResponseData(INVALID_EXPIRED_TOKEN));
+            } else {
+                setResponseError(response, Response
+                        .getNewInstance()
+                        .createErrorResponseData(INVALID_TOKEN));
             }
+
         }
         chain.doFilter(request, response);
     }
 
-    private void setForbiddenResponse(String msg, HttpServletResponse response) throws IOException {
+    private void setResponseError(HttpServletResponse response, ResponseData responseData) throws IOException {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        new ObjectMapper()
-                .writeValue(response.getOutputStream(),
-                        Response.getNewInstance()
-                                .createErrorResponseData(INVALID_FORBIDDEN));
+        response.setStatus(responseData.getStatus());
+        new ObjectMapper().writeValue(response.getOutputStream(), responseData);
     }
 }
