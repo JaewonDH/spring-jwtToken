@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static com.jwt.response.ErrorCode.INVALID_FORBIDDEN;
+
 //허가
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     private UserService userService;
@@ -45,6 +47,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                     return;
                 } else {
                     setForbiddenResponse("인증에 실패하였습니다.", response);
+                    return;
                 }
             }
         } catch (Exception e) {
@@ -57,10 +60,11 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private void setForbiddenResponse(String msg, HttpServletResponse response) throws IOException {
-        Response resultResponse = new Response();
-        resultResponse.setErrorResponse(msg, HttpStatus.FORBIDDEN);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpStatus.FORBIDDEN.value());
-        new ObjectMapper().writeValue(response.getOutputStream(), resultResponse);
+        new ObjectMapper()
+                .writeValue(response.getOutputStream(),
+                        Response.getNewInstance()
+                                .createErrorResponseData(INVALID_FORBIDDEN));
     }
 }

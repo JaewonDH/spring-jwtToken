@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jwt.domain.model.TokenInfo;
 import com.jwt.domain.request.User;
 import com.jwt.response.Response;
+import com.jwt.response.ResponseData;
 import com.jwt.security.CustomUserDetail;
 import com.jwt.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.jwt.response.ErrorCode.INVALID_EMAIL_PASSWORD;
+import static com.jwt.response.ErrorCode.INVALID_UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 // 로그인 인증
 // 시큐리티 스프링을 동작 위해서 만든 SecurityConfig의 configure(HttpSecurity http) 콜백 함수에 http로 .add filter 등록하기 위한 필터
@@ -42,11 +48,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             if (request.getInputStream().available() == 0) {
-                Response resultResponse = new Response();
-                resultResponse.setErrorResponse("아이디와 비번을 전달해주세요", HttpStatus.BAD_REQUEST);
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 response.setStatus(HttpStatus.BAD_REQUEST.value());
-                new ObjectMapper().writeValue(response.getOutputStream(), resultResponse);
+                new ObjectMapper().writeValue(response.getOutputStream(),
+                        Response.getNewInstance().createErrorResponseData(INVALID_EMAIL_PASSWORD));
                 return null;
             }
             User user = objectMapper.readValue(request.getInputStream(), User.class);
@@ -61,11 +66,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        Response resultResponse = new Response();
-        resultResponse.setErrorResponse("로그인 실패", HttpStatus.UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        new ObjectMapper().writeValue(response.getOutputStream(), resultResponse);
+        response.setStatus(UNAUTHORIZED.value());
+        new ObjectMapper().writeValue(response.getOutputStream(), Response.getNewInstance()
+                .createErrorResponseData(INVALID_UNAUTHORIZED));
     }
 
     @Override
@@ -83,10 +87,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         userService.saveRedisRefreshToken(tokenInfo);
-
-        Response resultResult = new Response();
-        resultResult.setResponse("로그인 성공", tokens);
-
-        new ObjectMapper().writeValue(response.getOutputStream(), resultResult);
+        new ObjectMapper().writeValue(response.getOutputStream(),
+                Response.getNewInstance().createResponseData("로그인 성공",tokens));
     }
 }
