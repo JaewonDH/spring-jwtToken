@@ -1,6 +1,7 @@
 package com.jwt.response;
 
 import lombok.Data;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
@@ -43,6 +44,19 @@ public class Response {
     public ResponseEntity<ResponseData> createResponseEntity(String msg, Object object) {
         return ResponseEntity
                 .ok()
+                .body(ResponseData.builder()
+                        .status(OK.value())
+                        .data(object)
+                        .code(OK.name())
+                        .message(msg)
+                        .build()
+                );
+    }
+
+    public ResponseEntity<ResponseData> createResponseEntity(String msg, Object object, String cookie ) {
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.SET_COOKIE, cookie)
                 .body(ResponseData.builder()
                         .status(OK.value())
                         .data(object)

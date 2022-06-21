@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -81,8 +82,17 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         TokenInfo tokenInfo = userService.createToken(customUserDetail.getUsername());
 
+        Cookie cookie = new Cookie("refreshToken",tokenInfo.getRefreshToken());
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+        //cookie.setDomain('localhost:3000');
+        //cookie.setDomain("localhost");
+        cookie.setPath("/");
+
+        response.addCookie(cookie);
+
         Map<String, String> tokens = new HashMap<>();
-        tokens.put("refreshToken", "Bearer " + tokenInfo.getRefreshToken());
+        //tokens.put("refreshToken", "Bearer " + tokenInfo.getRefreshToken());
         tokens.put("accessToken", "Bearer " + tokenInfo.getAccessToken());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 

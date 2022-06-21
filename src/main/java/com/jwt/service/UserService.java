@@ -10,12 +10,15 @@ import com.jwt.util.JWTUtil;
 import com.jwt.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import static com.jwt.response.ErrorCode.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -50,7 +53,7 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<ResponseData> refreshToken(String refreshToken, String accessToken) {
+    public ResponseEntity<ResponseData> refreshToken(String refreshToken, String accessToken, HttpServletResponse response) {
         if (accessToken == null || refreshToken == null || refreshToken.isEmpty() || accessToken.isEmpty()) {
             throw new CustomException(INVALID_TOKEN);
         }
@@ -60,21 +63,43 @@ public class UserService {
 
         // 토큰이 유효한지 확인 후 토큰에서 디코딩 후 이메일 값 추출
         String email = findTokenToEmail(accessToken);
-
+        System.out.println("BEFORE refreshToken:  "+refreshToken+"\r\n");
         // 이메일 값으로 redis에서 refresh 키 반환
         String redisToken = redisUtil.getRedisRefreshToken(email);
         if (redisToken == null || !redisToken.equals(refreshToken)) {
             throw new CustomException(INVALID_REFRESH_TOKEN);
         } else {
+            Cookie refreshCookie = new Cookie("refreshToken",null);
+            refreshCookie.setMaxAge(0);
+            refreshCookie.setPath("/");
+
+            response.addCookie(refreshCookie);
+
             // 토큰 생성
             TokenInfo tokenInfo = jwtUtil.createToken(email);
             // 토큰 업데이트
             redisUtil.saveRedisRefreshToken(tokenInfo);
 
-            tokenInfo.setRefreshToken("Bearer " + tokenInfo.getRefreshToken());
+            //tokenInfo.setRefreshToken("Bearer " + tokenInfo.getRefreshToken());
             tokenInfo.setAccessToken("Bearer " + tokenInfo.getAccessToken());
-            return Response.getNewInstance().createResponseEntity("refresh 토큰 생성", tokenInfo);
+
+            String cookie=getRefreshTokenCookie(tokenInfo.getRefreshToken());
+
+
+            System.out.println("cookie:  "+cookie+"\r\n");
+
+
+            return Response.getNewInstance().createResponseEntity("refresh 토큰 생성", tokenInfo,cookie);
         }
+    }
+
+    private String getRefreshTokenCookie(String token){
+        ResponseCookie responseCookie = ResponseCookie.from("refreshToken",token)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .build();
+        return responseCookie.toString();
     }
 
     public ResponseEntity<ResponseData> logout(String accessToken) {
